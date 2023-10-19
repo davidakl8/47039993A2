@@ -183,3 +183,29 @@ class Turbine:
         mech_coef = self.determine_mech_coef()
         return 0.5 * site.get_rho() * np.pi * self.r**2 * v_hub**3 * mech_coef
 
+   def determine_hub_speed_np(v_meas, h_meas, h_hub, alpha):
+        """Function to calculate the wind speed at the hub height using NumPy arrays.
+
+        Parameters
+        ----------
+        v_meas: np.ndarray
+            Wind speeds measured at various heights.
+        h_meas: float
+            Height at which wind speed is measured.
+        h_hub: float
+            Height of the hub.
+        alpha: float
+            Correlation coefficient.
+
+        Returns
+        -------
+        v_hub: np.ndarray
+            Wind speeds at the hub height.
+        """
+    
+        # Calculate the correction factor for each element in v_meas
+        correction_factor = (h_hub / h_meas) ** alpha
+        # Apply the correction factor to v_meas using NumPy element-wise operations
+        v_hub = v_meas * correction_factor
+    
+        return v_hub
