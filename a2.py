@@ -95,3 +95,36 @@ def generate_windfarm_power_curve(power_curve_filename, turbine_number):
    
     return wind_speed_array
 
+class Site:
+    def __init__(self, alpha, rho, h_meas):
+        """
+        Initialize a Site object with the provided site variables.
+
+        Parameters:
+        alpha (float): Correlation coefficient.
+        rho (float): The air density.
+        h_meas (float): Height at which the wind speed is measured.
+        """
+        self.alpha = alpha
+        self.rho = rho
+        self.h_meas = h_meas
+        self.v_meas = 0.0  # Initialize the measured wind speed to 0.0
+
+    def get_alpha(self):
+        """Returns the correlation coefficient."""
+        return self.alpha
+
+    def get_rho(self):
+        """Returns the air density."""
+        return self.rho
+
+    def get_height(self):
+        """Returns the height of the measurement."""
+        return self.h_meas
+
+    def get_meas_speed(self):
+        """Returns the wind speed measurement."""
+        return self.v_meas
+
+
+
