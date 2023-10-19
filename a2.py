@@ -126,5 +126,13 @@ class Site:
         """Returns the wind speed measurement."""
         return self.v_meas
 
+    def set_meas_speed(self, u, v):
+        """
+        Calculates and sets the measured speed based on u and v measurements.
 
+        Parameters:
+        u (float): The wind speed measurement in the u direction (east-west).
+        v (float): The wind speed measurement in the v direction (north-south).
+        """
+        self.v_meas = (u**2 + v**2)**0.5
 
