@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def seq_array(array_shape, s = 1.):
     """ Function that generates a sequential array with the shape provided by
