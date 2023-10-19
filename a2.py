@@ -81,7 +81,7 @@ def uv_to_speed_direction(u, v):
 
 def generate_windfarm_power_curve(power_curve_filename, turbine_number):
     wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
-    wind_speed_array[:, 1] *= turbine_number
+    wind_speed_array[:, 1] *= (turbine_number/1000)
     
     x_array = wind_speed_array[:, 0]
     y_array = wind_speed_array[:, 1]
