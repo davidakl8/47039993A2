@@ -55,6 +55,11 @@ def determine_hub_speed_np(v_meas, h_meas, h_hub, alpha):
     return v_hub
 
 
+def generate_windfarm_power_curve(power_curve_filename, turbine_number):
+    wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
+    return wind_speed_array
+
+
 def uv_to_speed_direction(u, v):
     """
     Convert wind speeds from u and v components into speed and direction.
