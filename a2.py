@@ -55,10 +55,6 @@ def determine_hub_speed_np(v_meas, h_meas, h_hub, alpha):
     return v_hub
 
 
-def generate_windfarm_power_curve(power_curve_filename, turbine_number):
-    wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
-    return wind_speed_array
-
 
 def uv_to_speed_direction(u, v):
     """
@@ -82,5 +78,19 @@ def uv_to_speed_direction(u, v):
     return (speed, direction_deg)
 
 
-
+def generate_windfarm_power_curve(power_curve_filename, turbine_number):
+    wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
+    wind_speed_array[:, 1] *= turbine_number
+    
+    x_array = wind_speed_array[:, 0]
+    y_array = wind_speed_array[:, 1]
+    
+    fig,ax = plt.subplots()
+    ax.plot(x_array, y_array)
+    fig.suptitle('Wind Farm Power Curve')
+    ax.set(xlabel="Wind_Speed", ylabel="Power (MW)")
+    ax.grid()
+    plt.show()
+   
+    return wind_speed_array
 
