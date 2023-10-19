@@ -55,6 +55,27 @@ def determine_hub_speed_np(v_meas, h_meas, h_hub, alpha):
     return v_hub
 
 
+def uv_to_speed_direction(u, v):
+    """
+    Convert wind speeds from u and v components into speed and direction.
+
+    Parameters:
+    u (float): East-West component (towards east positive) m/s.
+    v (float): North-South component (towards north positive) m/s.
+
+    Returns:
+    speed_and_direction : A tuple containing wind speed (m/s) and wind
+    direction (in degrees, wind from the north = 0 or 360 degrees).
+    """
+    # Calculate wind speed
+    speed = np.sqrt(u**2 + v**2)
+    
+    # Calculate wind direction in degrees using arctan2
+    direction_rad = np.arctan2(-v, -u)  # Negative signs to account for wind direction convention
+    direction_deg = (np.degrees(direction_rad) + 360) % 360  # Convert to degrees (0-360)
+
+    return (speed, direction_deg)
+
 
 
 
