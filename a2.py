@@ -71,7 +71,7 @@ def uv_to_speed_direction(u, v):
     speed = np.sqrt(u**2 + v**2)
     
     # Calculate wind direction in degrees using arctan2
-    direction_rad = np.arctan2(-v, -u)  # Negative signs to account for wind direction convention
+    direction_rad = np.arctan2(-u, -v)  # Negative signs to account for wind direction convention
     direction_deg = (np.degrees(direction_rad) + 360) % 360  # Convert to degrees (0-360)
 
     return (speed, direction_deg)
