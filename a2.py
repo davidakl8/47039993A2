@@ -22,7 +22,7 @@ def seq_array(array_shape, s = 1.):
     # np.prod calculates the product of array elements
     # From line 42, sequential_array is a 1D array
 
-    return sequential_array
+    return sequential_array.reshape(array_shape)
     # np.reshape allows for the 1D array generated in line 42 to be transformed
     # into a 2D array
 
