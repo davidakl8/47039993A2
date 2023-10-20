@@ -232,3 +232,29 @@ class Turbine:
         return p_mech
 
 
+def determine_total_energy(turbine, site, wind_filename):
+    # Read wind data from the CSV file
+    data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
+    datetime_strings = data[:, 0]
+    u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
+    v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(2))
+    
+    # Convert the date strings to datetime objects
+    t_ar = np.array([datetime.strptime(date_str, '%d/%m/%Y %H:%M') for date_str in datetime_strings])
+    
+    # Initialize total energy
+    total_energy = 0.0
+    
+    # Loop through each hour and calculate energy
+    for i in range(len(t_ar)):
+        site.set_meas_speed(u_data[i], v_data[i])  # Set wind speed from the file
+        turbine.determine_hub_speed(site)  # Determine hub speed
+        turbine.cap_hub_speed()  # Cap hub speed as needed
+        p_mech = turbine.determine_mech_power(site)  # Determine mechanical power
+        p_elec = p_mech * 0.9  # Convert to electrical power with 90% efficiency
+        delta_t = (t_ar[i + 1] - t_ar[i]).total_seconds() / 3600.0  # Calculate time difference in hours
+        total_energy += p_elec * delta_t  # Accumulate total energy
+        
+    return total_energy
+
+
