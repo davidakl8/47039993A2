@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 def seq_array(array_shape, s = 1.):
     """ Function that generates a sequential array with the shape provided by
@@ -80,6 +81,9 @@ def uv_to_speed_direction(u, v):
 
 
 def generate_windfarm_power_curve(power_curve_filename, turbine_number):
+    """
+
+    """
     wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
     wind_speed_array[:, 1] *= (turbine_number/1000)
     
@@ -94,6 +98,33 @@ def generate_windfarm_power_curve(power_curve_filename, turbine_number):
     plt.show()
    
     return wind_speed_array
+
+
+
+def generate_time_wind_power(wind_filename, power_filename):
+    # Read wind data from the wind file
+    wind_data = np.genfromtxt(wind_filename, delimiter=',', skip_header=1, dtype=None, names=['datetime', 'wind_speed'])
+    
+    # Read power data from the power file
+    power_data = np.genfromtxt(power_filename, delimiter=',', skip_header=1, dtype=None, names=['datetime', 'power'])
+    
+    # Extract the data into separate arrays
+    times = np.array([datetime.strptime(dt.decode('utf-8'), '%d/%m/%Y %H:%M') for dt in wind_data['datetime']])
+    wind_speed = wind_data['wind_speed']
+    power = power_data['power']
+    
+    # Constants for wind correction
+    hub_height = 80.0
+    alpha = 0.143
+
+    # Calculate the corrected wind speed at hub height
+    corrected_wind_speed = wind_speed * (hub_height / 10.0) ** alpha
+
+    return times, corrected_wind_speed, power
+
+
+
+
 
 class Site:
     def __init__(self, alpha, rho, h_meas):
@@ -135,6 +166,11 @@ class Site:
         v (float): The wind speed measurement in the v direction (north-south).
         """
         self.v_meas = (u**2 + v**2)**0.5
+
+
+
+
+
 
 class Turbine:
     def __init__(self, h_hub, r, omega, curve_coeffs, speeds):
