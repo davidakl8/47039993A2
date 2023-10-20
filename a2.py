@@ -23,10 +23,10 @@ def seq_array(array_shape, s = 1.):
     
     sequential_array = np.arange(s, s + np.prod(array_shape), 1)
     # np.prod calculates the product of array elements
-    # From line 42, sequential_array is a 1D array
+    # From line 24, sequential_array is a 1D array
 
     return sequential_array.reshape(array_shape)
-    # np.reshape allows for the 1D array generated in line 42 to be transformed
+    # np.reshape allows for the 1D array generated in line 24 to be transformed
     # into a 2D array
 
 
@@ -64,14 +64,19 @@ def uv_to_speed_direction(u, v):
     """
     Convert wind speeds from u and v components into speed and direction.
 
-    Parameters:
-    u (float): East-West component (towards east positive) m/s.
-    v (float): North-South component (towards north positive) m/s.
+    Parameters
+    ----------
+    u: float
+        East-West component (east = positive) m/s.
+    v: float
+        North-South component (north = positive) m/s.
 
-    Returns:
-    speed_and_direction : A tuple containing wind speed (m/s) and wind
-    direction (in degrees, wind from the north = 0 or 360 degrees).
+    Returns
+    -------
+    speed_and_direction: tuple
+        A tuple containing wind speed (m/s) and wind direction (in degrees, wind from the north = 0 or 360 degrees).
     """
+    
     # Calculate wind speed
     speed = np.sqrt(u**2 + v**2)
     
@@ -85,6 +90,23 @@ def uv_to_speed_direction(u, v):
 
 
 def generate_windfarm_power_curve(power_curve_filename, turbine_number):
+    """ A function which creates a Wind Farm Power Curve of total wind farm power in MW 
+        versus wind speed.
+
+    Parameters
+    ----------
+    power_curve_filename:
+        filename for power curve 'power_curve.csv'
+    turbine_number: int
+        number of turbines on turbine farm
+
+    Returns
+    -------
+    wind_speed_array: np.array
+        A numpy array with two columns and type float. The array’s first column will be the wind 
+        speed, and the second the wind farm power output expected at that speed.
+    """
+    
     wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
     wind_speed_array[:, 1] *= (turbine_number/1000)
     
@@ -102,18 +124,19 @@ def generate_windfarm_power_curve(power_curve_filename, turbine_number):
 
 
 def generate_time_wind_power(wind_filename, power_filename):
-    """ Function description
+    """ A function that reads the time, wind speed and power generation data stored in the 2 file names provided,
+        and outputs a tuple of three 1D numpy arrays.
     
     Parameters
     ----------
-    wind_filename: TYPE
-        DESCRIPTION.
-    power_filename: TYPE
-        DESCRIPTION.
+    wind_filename:
+        filename for power curve 'capital_wind.csv'
+    power_filename:
+        filename for power curve 'capital_gen.csv'
     
     Returns
     -------
-    NAME: tuple
+    3 element tuple:
         A tuple of three 1D numpy arrays. The first member of the tuple is an array
         of times with datetime type with time in UTC. The second member is wind speed.
         The final member is power float type containing values for power generation in MW.
@@ -124,9 +147,9 @@ def generate_time_wind_power(wind_filename, power_filename):
     time_data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
     u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
     v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(2))
-    power_data = np.loadtxt(power_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
-    
+   
     # Read power data from the power file
+    power_data = np.loadtxt(power_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
     
     # times array    
     datetime_strings = time_data[:, 0]
@@ -146,7 +169,6 @@ def generate_time_wind_power(wind_filename, power_filename):
 
 
 def wind_farm_figure(windfarm_curve, times, wind, power):
-
     plt.figure(1)
     plt.plot(power, wind)
     plt.plot(windfarm_curve)
@@ -155,12 +177,16 @@ def wind_farm_figure(windfarm_curve, times, wind, power):
 class Site:
     def __init__(self, alpha, rho, h_meas):
         """
-        Initialize a Site object with the provided site variables.
+        Initialise a Site object with the provided site variables.
 
-        Parameters:
-        alpha (float): Correlation coefficient.
-        rho (float): The air density.
-        h_meas (float): Height at which the wind speed is measured.
+        Parameters
+        ----------
+        alpha: float
+            Correlation coefficient.
+        rho: float
+            The air density.
+        h_meas: float
+            Height at which the wind speed is measured.
         """
         self.alpha = alpha
         self.rho = rho
@@ -168,29 +194,33 @@ class Site:
         self.v_meas = 0.0  # Initialize the measured wind speed to 0.0
 
     def get_alpha(self):
-        """Returns the correlation coefficient."""
+        """Returns the correlation coefficient"""
         return self.alpha
 
     def get_rho(self):
-        """Returns the air density."""
+        """Returns the air density"""
         return self.rho
 
     def get_height(self):
-        """Returns the height of the measurement."""
+        """Returns the height of the measurement"""
         return self.h_meas
 
     def get_meas_speed(self):
-        """Returns the wind speed measurement."""
+        """Returns the wind speed measurement"""
         return self.v_meas
 
     def set_meas_speed(self, u, v):
         """
         Calculates and sets the measured speed based on u and v measurements.
 
-        Parameters:
-        u (float): The wind speed measurement in the u direction (east-west).
-        v (float): The wind speed measurement in the v direction (north-south).
+        Parameters
+        ----------
+        u: float
+            The wind speed measurement in the u direction (east-west).
+        v: float
+            The wind speed measurement in the v direction (north-south).
         """
+        
         self.v_meas = (u**2 + v**2)**0.5
     
 
@@ -221,7 +251,6 @@ class Turbine:
     def determine_windpower(self, site):
         v_hub = self.v_hub
         rho = site.rho
-
         p_wind = (0.5 * rho * math.pi * (self.r ** 2) * v_hub ** 3) / 1000
         return p_wind
 
@@ -241,11 +270,14 @@ class Turbine:
             p_mech = self.determine_windpower(site) * self.determine_mech_coef()
             return p_mech
 
-def determine_total_energy(turbine, site, wind_filename):    
-    # Initialise total energy
-    total_energy = 0.0
+def determine_total_energy(turbine, site, wind_filename):
+    # Read wind data from the wind file
+    time_data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
     u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
     v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(2))
+    
+    # Initialise total energy
+    total_energy = 0.0
     
     # Loop through each hour and calculate energy
     for i in range(len(u_data)):
@@ -259,18 +291,10 @@ def determine_total_energy(turbine, site, wind_filename):
     return total_energy
 
 
+
+
+'''
 wind_filename = 'capital_wind.csv'
 power_filename = 'capital_gen.csv'
-
-
-
-
 '''
-generate_time_wind_power(wind_filename, power_filename)
-windfarm_curve = generate_windfarm_power_curve(power_filename, 67)
-times = generate_time_wind_power(wind_filename, power_filename)[0]
-wind = generate_time_wind_power(wind_filename, power_filename)[1]
-power = generate_time_wind_power(wind_filename, power_filename)[2]
-'''
-
 
