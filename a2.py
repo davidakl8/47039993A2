@@ -235,9 +235,11 @@ class Turbine:
         v_hub = self.v_hub
         rho = site.rho
 
-        p_mech = self.determine_windpower(site) * self.determine_mech_coef()
-        return p_mech
-
+        if v_hub == 0:
+            return 0.0  # If v_hub is 0, power is 0
+        else:
+            p_mech = self.determine_windpower(site) * self.determine_mech_coef()
+            return p_mech
 
 def determine_total_energy(turbine, site, wind_filename):    
     # Initialise total energy
@@ -255,3 +257,20 @@ def determine_total_energy(turbine, site, wind_filename):
         total_energy += p_elec  # Accumulate total energy
         
     return total_energy
+
+
+wind_filename = 'capital_wind.csv'
+power_filename = 'capital_gen.csv'
+
+
+
+
+'''
+generate_time_wind_power(wind_filename, power_filename)
+windfarm_curve = generate_windfarm_power_curve(power_filename, 67)
+times = generate_time_wind_power(wind_filename, power_filename)[0]
+wind = generate_time_wind_power(wind_filename, power_filename)[1]
+power = generate_time_wind_power(wind_filename, power_filename)[2]
+'''
+
+
