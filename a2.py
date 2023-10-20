@@ -100,30 +100,49 @@ def generate_windfarm_power_curve(power_curve_filename, turbine_number):
     return wind_speed_array
 
 
-
 def generate_time_wind_power(wind_filename, power_filename):
+    """ Function description
+    
+    Parameters
+    ----------
+    wind_filename: TYPE
+        DESCRIPTION.
+    power_filename: TYPE
+        DESCRIPTION.
+    
+    Returns
+    -------
+    NAME: tuple
+        A tuple of three 1D numpy arrays. The first member of the tuple is an array
+        of times with datetime type with time in UTC. The second member is wind speed.
+        The final member is power float type containing values for power generation in MW.
+
+    """
+
+    
     # Read wind data from the wind file
-    wind_data = np.genfromtxt(wind_filename, delimiter=',', skip_header=1, dtype=None, names=['datetime', 'wind_speed'])
+    time_data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
+    u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
+    v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
+    power_data = np.loadtxt(power_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
     
     # Read power data from the power file
-    power_data = np.genfromtxt(power_filename, delimiter=',', skip_header=1, dtype=None, names=['datetime', 'power'])
     
-    # Extract the data into separate arrays
-    times = np.array([datetime.strptime(dt.decode('utf-8'), '%d/%m/%Y %H:%M') for dt in wind_data['datetime']])
-    wind_speed = wind_data['wind_speed']
-    power = power_data['power']
+    # times array    
+    datetime_strings = time_data[:, 0]
+    # Convert the date strings to datetime objects
+    t_ar = np.array([datetime.strptime(date_str, '%d/%m/%Y %H:%M') for date_str in datetime_strings])
+
+    # wind speed array
+    wind_speed = np.sqrt(np.square(u_data) + np.square(v_data))
+    # corrected wind speed:
+    w_ar = determine_hub_speed_np(wind_speed, 10, 80, 0.143)
     
-    # Constants for wind correction
-    hub_height = 80.0
-    alpha = 0.143
-
-    # Calculate the corrected wind speed at hub height
-    corrected_wind_speed = wind_speed * (hub_height / 10.0) ** alpha
-
-    return times, corrected_wind_speed, power
-
-
-
+    
+    p_ar = np.array(power_data)
+    
+    
+    return (t_ar, w_ar, p_ar)
 
 
 class Site:
