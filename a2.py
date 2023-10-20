@@ -123,7 +123,7 @@ def generate_time_wind_power(wind_filename, power_filename):
     # Read wind data from the wind file
     time_data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
     u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
-    v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
+    v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(2))
     power_data = np.loadtxt(power_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
     
     # Read power data from the power file
