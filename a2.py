@@ -202,14 +202,14 @@ class Turbine:
     def determine_hub_speed(self, site):
         h_meas = site.h_meas
         alpha = site.alpha
-        v_meas = site.meas_speed
+        v_meas = site.v_meas  # Update to use v_meas
 
         self.v_hub = v_meas * (self.h_hub / h_meas) ** alpha
 
     def cap_hub_speed(self):
-        v_cutout = self.speeds[1]  # Cut-out speed
-        if self.v_hub > v_cutout:
-            self.v_hub = v_cutout
+        v_rated = self.speeds[2]  # Rated speed
+        if self.v_hub > v_rated:
+            self.v_hub = v_rated
 
     def determine_windpower(self, site):
         v_hub = self.v_hub
@@ -230,4 +230,5 @@ class Turbine:
 
         p_mech = self.determine_windpower(site) * self.determine_mech_coef()
         return p_mech
+
 
