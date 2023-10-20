@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
+import math
 
 def seq_array(array_shape, s = 1.):
     """ Function that generates a sequential array with the shape provided by
@@ -186,11 +187,52 @@ class Site:
         """
         self.v_meas = (u**2 + v**2)**0.5
 
+class Turbine:
+    def __init__(self, h_hub, r, omega, curve_coeffs, speeds):
+        self.h_hub = h_hub
+        self.r = r
+        self.omega = omega
+        self.curve_coeffs = curve_coeffs
+        self.speeds = speeds
+        self.v_hub = 0  # Initialize hub speed to 0
+
+    def get_hub_speed(self):
+        return self.v_hub
+
+    def determine_hub_speed(self, site):
+        h_meas = site.h_meas
+        alpha = site.alpha
+        v_meas = site.meas_speed
+
+        self.v_hub = v_meas * (self.h_hub / h_meas) ** alpha
+
+    def cap_hub_speed(self):
+        v_cutout = self.speeds[1]  # Cut-out speed
+        if self.v_hub > v_cutout:
+            self.v_hub = v_cutout
+
+    def determine_windpower(self, site):
+        v_hub = self.v_hub
+        rho = site.rho
+
+        p_wind = (0.5 * rho * math.pi * (self.r ** 2) * v_hub ** 3) / 1000
+        return p_wind
+
+    def determine_mech_coef(self):
+        lambda_ratio = self.r * self.omega / self.v_hub
+        coeffs = self.curve_coeffs
+        cp = sum(ai * lambda_ratio ** i for i, ai in enumerate(coeffs, start=1))
+        return cp
+
+    def determine_mech_power(self, site):
+        v_hub = self.v_hub
+        rho = site.rho
+
+        p_mech = self.determine_windpower(site) * self.determine_mech_coef()
+        return p_mech
 
 
-
-
-
+"""
 class Turbine:
     def __init__(self, h_hub, r, omega, curve_coeffs, speeds):
         """
@@ -237,4 +279,4 @@ class Turbine:
         v_hub = self.v_hub
         mech_coef = self.determine_mech_coef()
         return 0.5 * site.get_rho() * np.pi * self.r**2 * v_hub**3 * mech_coef
-
+"""
