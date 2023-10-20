@@ -32,10 +32,11 @@ def seq_array(array_shape, s = 1.):
 
 
 def determine_hub_speed_np(v_meas, h_meas, h_hub, alpha):
-    """
-    Correct the wind speed at the hub height using NumPy arrays.
+    """ Function to correct the wind speed for differences between  velocity
+        measurement height and the hub height, using NumPy arrays.
 
-    Parameters:
+    Parameters
+    ----------
     v_meas: np.ndarray
         Wind speeds measured at various heights.
     h_meas: float
@@ -45,18 +46,18 @@ def determine_hub_speed_np(v_meas, h_meas, h_hub, alpha):
     alpha: float
         Correlation coefficient.
 
-    Returns:
+    Returns
+    -------
     v_hub: np.ndarray
         Wind speeds at the hub height.
     """
+    
     # Calculate the correction factor for each element in v_meas
     correction_factor = (h_hub / h_meas) ** alpha
-    
     # Apply the correction factor to v_meas using NumPy element-wise operations
     v_hub = v_meas * correction_factor
     
     return v_hub
-
 
 
 def uv_to_speed_direction(u, v):
@@ -77,14 +78,13 @@ def uv_to_speed_direction(u, v):
     # Calculate wind direction in degrees using arctan2
     direction_rad = np.arctan2(-u, -v)  # Negative signs to account for wind direction convention
     direction_deg = (np.degrees(direction_rad) + 360) % 360  # Convert to degrees (0-360)
-
-    return (speed, direction_deg)
+    
+    speed_and_direction = (speed, direction_deg)
+    
+    return speed_and_direction
 
 
 def generate_windfarm_power_curve(power_curve_filename, turbine_number):
-    """
-
-    """
     wind_speed_array = np.loadtxt(power_curve_filename, skiprows=1, delimiter=",")
     wind_speed_array[:, 1] *= (turbine_number/1000)
     
@@ -93,7 +93,7 @@ def generate_windfarm_power_curve(power_curve_filename, turbine_number):
     
     fig,ax = plt.subplots()
     ax.plot(x_array, y_array)
-    fig.suptitle('Wind Farm Power Curve')
+    fig.suptitle('Wind Farm Power Curve', fontsize=16)
     ax.set(xlabel="Wind_Speed", ylabel="Power (MW)")
     ax.grid()
     plt.show()
@@ -120,7 +120,6 @@ def generate_time_wind_power(wind_filename, power_filename):
 
     """
 
-    
     # Read wind data from the wind file
     time_data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
     u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
@@ -139,13 +138,20 @@ def generate_time_wind_power(wind_filename, power_filename):
     # corrected wind speed:
     w_ar = determine_hub_speed_np(wind_speed, 10, 80, 0.143)
     
-    
+    # create power array
     p_ar = np.array(power_data)
-    
-    
+        
     return (t_ar, w_ar, p_ar)
 
 
+
+def wind_farm_figure(windfarm_curve, times, wind, power):
+
+    plt.figure(1)
+    plt.plot(power, wind)
+    plt.plot(windfarm_curve)
+    
+    
 class Site:
     def __init__(self, alpha, rho, h_meas):
         """
@@ -186,6 +192,7 @@ class Site:
         v (float): The wind speed measurement in the v direction (north-south).
         """
         self.v_meas = (u**2 + v**2)**0.5
+    
 
 class Turbine:
     def __init__(self, h_hub, r, omega, curve_coeffs, speeds):
@@ -194,7 +201,7 @@ class Turbine:
         self.omega = omega
         self.curve_coeffs = curve_coeffs
         self.speeds = speeds
-        self.v_hub = 0  # Initialize hub speed to 0
+        self.v_hub = 0  # Initialise hub speed to 0
 
     def get_hub_speed(self):
         return self.v_hub
@@ -232,29 +239,19 @@ class Turbine:
         return p_mech
 
 
-
-def determine_total_energy(turbine, site, wind_filename):
-    # Read wind data from the CSV file
-    data = np.loadtxt(wind_filename, dtype=str, delimiter=',', skiprows=1)
-    datetime_strings = data[:, 0]
+def determine_total_energy(turbine, site, wind_filename):    
+    # Initialise total energy
+    total_energy = 0.0
     u_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(1))
     v_data = np.loadtxt(wind_filename, dtype=float, delimiter=',', skiprows=1, usecols=(2))
     
-    # Convert the date strings to datetime objects
-    t_ar = np.array([datetime.strptime(date_str, '%d/%m/%Y %H:%M') for date_str in datetime_strings])
-    
-    # Initialize total energy
-    total_energy = 0.0
-    
     # Loop through each hour and calculate energy
-    for i in range(len(t_ar)-1):
+    for i in range(len(u_data)):
         site.set_meas_speed(u_data[i], v_data[i])  # Set wind speed from the file
         turbine.determine_hub_speed(site)  # Determine hub speed
         turbine.cap_hub_speed()  # Cap hub speed as needed
         p_mech = turbine.determine_mech_power(site)  # Determine mechanical power
         p_elec = p_mech * 0.9  # Convert to electrical power with 90% efficiency
-        delta_t = (t_ar[i + 1] - t_ar[i]).total_seconds() / 3600.0  # Calculate time difference in hours
-        total_energy += p_elec * delta_t  # Accumulate total energy
+        total_energy += p_elec  # Accumulate total energy
         
     return total_energy
-
